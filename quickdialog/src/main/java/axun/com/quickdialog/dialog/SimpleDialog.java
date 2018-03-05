@@ -4,8 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.StyleRes;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -18,12 +18,14 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import axun.com.quickdialog.R;
+import axun.com.quickdialog.adapter.ListChooseAdapter;
+import axun.com.quickdialog.adapter.SingleChooseAdapter;
 
 /**
  * Created by Administrator on 2018/2/25.
@@ -37,6 +39,7 @@ public class SimpleDialog {
     private TextView mCancleBtn;
     private TextView mApplyBtn;
     private View view;
+    private int witch = 0;
 
     private SimpleDialog(Context context) {
         this.context = context;
@@ -66,12 +69,15 @@ public class SimpleDialog {
      * @return
      */
     public SimpleDialog create() {
+        witch = 0;
         dialog = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.MyDialog))
                 .create();
         //默认设置点击外部可取消
         dialog.setCanceledOnTouchOutside(true);
         view = LayoutInflater.from(context).inflate(R.layout.normal_dialog_layout, null);
         initView(view);
+        mContentLayout.removeAllViews();
+
         return this;
     }
 
@@ -80,14 +86,20 @@ public class SimpleDialog {
      * @param title
      * @return
      */
-    public SimpleDialog setTitle(String title) {
+    public SimpleDialog setTitle(String title,float textSize,int textColor) {
         if (!TextUtils.isEmpty(title)) {
             mTvTitle.setVisibility(View.VISIBLE);
             mTvTitle.setText(title);
+            mTvTitle.setTextSize(textSize);
+            mTvTitle.setTextColor(textColor);
         }else {
             mTvTitle.setVisibility(View.GONE);
         }
         return this;
+    }
+
+    public SimpleDialog setTitle(String title) {
+        return setTitle(title,16,Color.BLACK);
     }
 
     public SimpleDialog setTitle(CharSequence title){
@@ -113,7 +125,7 @@ public class SimpleDialog {
             mApplyBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.OnClick(dialog,0);
+                    listener.OnClick(dialog,witch);
                 }
             });
         }else {
@@ -220,7 +232,9 @@ public class SimpleDialog {
             textView.setTextColor(textColor);
             textView.setTextSize(textSize);
             textView.setGravity(gravity);
-            textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(0,20,0,20);
+            textView.setLayoutParams(layoutParams);
             textView.setText(message);
             mContentLayout.addView(textView);
         }
@@ -245,13 +259,12 @@ public class SimpleDialog {
      * @param listener
      * @return
      */
-    public SimpleDialog setItems(String[] items, final MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setItems(String[] items,BaseAdapter adapter, final MyDialogInterface.MyDialogListener listener){
         if (items!=null && items.length>0){
             ListView listView = new ListView(context);
             listView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             listView.setVerticalScrollBarEnabled(false);
             mContentLayout.addView(listView);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,items);
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -260,16 +273,71 @@ public class SimpleDialog {
                 }
             });
         }
-
         return this;
     }
 
-    public SimpleDialog setSingleChooseItems(String[] items, @Nullable MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setItems(String[] items,MyDialogInterface.MyDialogListener listener){
+        ListChooseAdapter adapter = new ListChooseAdapter(items,context);
+        return setItems(items,adapter,listener);
+    }
 
+    /**
+     * 设置单选列表
+     * @param items
+     * @param listener
+     * @return
+     */
+    public SimpleDialog setSingleChooseItems(String[] items, final MyDialogInterface.MyDialogListener listener){
+        if (items!=null && items.length>0){
+            final ListView listView = new ListView(context);
+            listView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            listView.setVerticalScrollBarEnabled(false);
+            mContentLayout.addView(listView);
+            final SingleChooseAdapter adapter = new SingleChooseAdapter(items,context);
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                    adapter.setSelectId(position);
+                    witch = position;
+                    listView.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (listener!=null){
+                                listener.OnClick(dialog,position);
+                            }
+                        }
+                    },500);
+                }
+            });
 
+        }
         return this;
     }
 
+    /**
+     * 设置位置
+     * @param gravity
+     * @return
+     */
+    public SimpleDialog setGravity(int gravity){
+        if (dialog!=null){
+            dialog.getWindow().setGravity(gravity);
+        }
+        return this;
+    }
+
+    public SimpleDialog setAnimation(@StyleRes int animation){
+        if (dialog!=null){
+            dialog.getWindow().setWindowAnimations(animation);
+        }
+        return this;
+    }
+
+
+    /**
+     * 显示
+     */
     public void show(){
         if (mApplyBtn.getVisibility() == View.VISIBLE && mCancleBtn.getVisibility() == View.GONE){
             mApplyBtn.setBackgroundResource(R.drawable.bottom_drawable);
@@ -285,7 +353,6 @@ public class SimpleDialog {
         mContentLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-
                 Window window = dialog.getWindow();
                 WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
                 Display display = windowManager.getDefaultDisplay();

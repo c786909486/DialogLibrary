@@ -1,12 +1,14 @@
 package axun.com.dialoglibrary;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import axun.com.quickdialog.MyDialogUtils;
 import axun.com.quickdialog.dialog.MyDialogInterface;
 import axun.com.quickdialog.dialog.SimpleDialog;
 
@@ -46,10 +48,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showListDialog();
                 break;
             case R.id.btn_3:
-
+                showSingleChooseDialog();
                 break;
             case R.id.btn_4:
-
+                showMultiChooseDialog();
                 break;
             default:
                 break;
@@ -124,6 +126,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 弹出单选对话框
      */
     private void showSingleChooseDialog(){
+        SimpleDialog.getInstance(this)
+                .create()
+                .setTitle("请选择")
+                .setSingleChooseItems(list, new MyDialogInterface.MyDialogListener() {
+                    @Override
+                    public void OnClick(Dialog dialog, int position) {
 
+                    }
+                }).setPositiveButton(new MyDialogInterface.MyDialogListener() {
+            @Override
+            public void OnClick(Dialog dialog, int position) {
+                Toast.makeText(MainActivity.this,"选择了"+list[position],Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        }).show();
+    }
+
+    private void showMultiChooseDialog(){
+        boolean[] checkItem = new boolean[]{false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
+        MyDialogUtils.getInstance().createMuiltyListDialog(this, "多选框", list, checkItem, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+
+            }
+        }, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
     }
 }
