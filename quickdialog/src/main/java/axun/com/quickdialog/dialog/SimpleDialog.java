@@ -32,6 +32,8 @@ import axun.com.quickdialog.adapter.SingleChooseAdapter;
  */
 
 public class SimpleDialog {
+    private static final int SCALE = 0;
+    private static final int FALL = 1;
     private Context context;
     private AlertDialog dialog;
     private TextView mTvTitle;
@@ -40,10 +42,10 @@ public class SimpleDialog {
     private TextView mApplyBtn;
     private View view;
     private int witch = 0;
+    private int state = SCALE;
 
     private SimpleDialog(Context context) {
         this.context = context;
-
     }
 
     private static SimpleDialog instance;
@@ -69,6 +71,7 @@ public class SimpleDialog {
      * @return
      */
     public SimpleDialog create() {
+        state = SCALE;
         witch = 0;
         dialog = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.MyDialog))
                 .create();
@@ -117,7 +120,7 @@ public class SimpleDialog {
      * @param listener
      * @return
      */
-    public SimpleDialog setPositiveButton(String text, int textColor, final MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(String text, int textColor, final SimpleDialogInterface.MyDialogListener listener){
         if (!TextUtils.isEmpty(text)){
             mApplyBtn.setVisibility(View.VISIBLE);
             mApplyBtn.setTextColor(textColor);
@@ -134,27 +137,27 @@ public class SimpleDialog {
         return this;
     }
 
-    public SimpleDialog setPositiveButton(CharSequence text, int textColor, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(CharSequence text, int textColor, SimpleDialogInterface.MyDialogListener listener){
         return setPositiveButton(text.toString(),textColor,listener);
     }
 
-    public SimpleDialog setPositiveButton(@StringRes int resId, int textColor, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(@StringRes int resId, int textColor, SimpleDialogInterface.MyDialogListener listener){
         return setPositiveButton(context.getResources().getText(resId),textColor,listener);
     }
 
-    public SimpleDialog setPositiveButton(String text, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(String text, SimpleDialogInterface.MyDialogListener listener){
         return setPositiveButton(text, Color.RED,listener);
     }
 
-    public SimpleDialog setPositiveButton(CharSequence text, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(CharSequence text, SimpleDialogInterface.MyDialogListener listener){
         return setPositiveButton(text.toString(),listener);
     }
 
-    public SimpleDialog setPositiveButton(@StringRes int resId, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(@StringRes int resId, SimpleDialogInterface.MyDialogListener listener){
         return setPositiveButton(context.getResources().getText(resId),listener);
     }
 
-    public SimpleDialog setPositiveButton(MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setPositiveButton(SimpleDialogInterface.MyDialogListener listener){
         return setPositiveButton("确定", listener);
     }
 
@@ -165,7 +168,7 @@ public class SimpleDialog {
      * @param listener
      * @return
      */
-    public SimpleDialog setCancelButton(String text, int textColor, final MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(String text, int textColor, final SimpleDialogInterface.MyDialogListener listener){
         if (!TextUtils.isEmpty(text)){
             mCancleBtn.setVisibility(View.VISIBLE);
             mCancleBtn.setTextColor(textColor);
@@ -183,27 +186,27 @@ public class SimpleDialog {
         return this;
     }
 
-    public SimpleDialog setCancelButton(CharSequence text, int textColor, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(CharSequence text, int textColor, SimpleDialogInterface.MyDialogListener listener){
         return setCancelButton(text.toString(),textColor,listener);
     }
 
-    public SimpleDialog setCancelButton(@StringRes int resId, int textColor, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(@StringRes int resId, int textColor, SimpleDialogInterface.MyDialogListener listener){
         return setCancelButton(context.getResources().getText(resId),textColor,listener);
     }
 
-    public SimpleDialog setCancelButton(String text, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(String text, SimpleDialogInterface.MyDialogListener listener){
         return setCancelButton(text, Color.BLACK,listener);
     }
 
-    public SimpleDialog setCancelButton(CharSequence text, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(CharSequence text, SimpleDialogInterface.MyDialogListener listener){
         return setCancelButton(text.toString(),listener);
     }
 
-    public SimpleDialog setCancelButton(@StringRes int resId, MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(@StringRes int resId, SimpleDialogInterface.MyDialogListener listener){
         return setCancelButton(context.getResources().getText(resId),listener);
     }
 
-    public SimpleDialog setCancelButton(MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setCancelButton(SimpleDialogInterface.MyDialogListener listener){
         return setCancelButton("取消",listener);
     }
 
@@ -259,7 +262,7 @@ public class SimpleDialog {
      * @param listener
      * @return
      */
-    public SimpleDialog setItems(String[] items,BaseAdapter adapter, final MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setItems(String[] items,BaseAdapter adapter, final SimpleDialogInterface.MyDialogListener listener){
         if (items!=null && items.length>0){
             ListView listView = new ListView(context);
             listView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -276,7 +279,7 @@ public class SimpleDialog {
         return this;
     }
 
-    public SimpleDialog setItems(String[] items,MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setItems(String[] items,SimpleDialogInterface.MyDialogListener listener){
         ListChooseAdapter adapter = new ListChooseAdapter(items,context);
         return setItems(items,adapter,listener);
     }
@@ -287,7 +290,7 @@ public class SimpleDialog {
      * @param listener
      * @return
      */
-    public SimpleDialog setSingleChooseItems(String[] items, final MyDialogInterface.MyDialogListener listener){
+    public SimpleDialog setSingleChooseItems(String[] items, final SimpleDialogInterface.MyDialogListener listener){
         if (items!=null && items.length>0){
             final ListView listView = new ListView(context);
             listView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -323,18 +326,27 @@ public class SimpleDialog {
     public SimpleDialog setGravity(int gravity){
         if (dialog!=null){
             dialog.getWindow().setGravity(gravity);
+            if (gravity == Gravity.BOTTOM){
+                state = FALL;
+            }else {
+                state = SCALE;
+            }
         }
         return this;
     }
 
+    /**
+     * 设置动画
+     * @param animation
+     * @return
+     */
     public SimpleDialog setAnimation(@StyleRes int animation){
         if (dialog!=null){
             dialog.getWindow().setWindowAnimations(animation);
         }
         return this;
     }
-
-
+    
     /**
      * 显示
      */
@@ -358,13 +370,25 @@ public class SimpleDialog {
                 Display display = windowManager.getDefaultDisplay();
                 android.view.WindowManager.LayoutParams p = dialog.getWindow().getAttributes();
                 Log.d("SimpleDialog",mContentLayout.getHeight()+"");
-                if (mContentLayout.getHeight()> display.getHeight() *0.75){
-                    p.height = (int) (display.getHeight() * 0.75);
-                    window.setAttributes(p);
+                if (state == SCALE){
+                    if (mContentLayout.getHeight()> display.getHeight() *0.75){
+                        p.height = (int) (display.getHeight() * 0.75);
+                        window.setAttributes(p);
+                    }
+                }else {
+                    if (mContentLayout.getHeight()> display.getHeight() *0.75) {
+                        p.width = display.getWidth();
+                        p.height = (int) (display.getHeight() * 0.75);
+                        window.setAttributes(p);
+                    }else {
+                        p.width = display.getWidth();
+                        window.setAttributes(p);
+                    }
                 }
             }
         });
     }
+
 
     private void initView(View view) {
         mTvTitle = (TextView) view.findViewById(R.id.tv_title);

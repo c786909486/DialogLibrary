@@ -7,7 +7,7 @@ import android.content.DialogInterface;
  * Created by Administrator on 2018/2/25.
  */
 
-public class MyDialogInterface {
+public class SimpleDialogInterface {
 
     public interface MyDialogListener {
 

@@ -35,6 +35,8 @@
                 android:text="复选对话框"
                 />
             <Button
+                android:id="@+id/btn_5"
+                android:text="评论栏"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                />
